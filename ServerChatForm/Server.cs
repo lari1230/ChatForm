@@ -10,23 +10,23 @@ namespace ServerChatForm
 
     public partial class Server : Form
     {
-        private TcpListener _listener;
-        private List<TcpClient> _clients = new List<TcpClient>();
-        private List<string> _bannedWords = new List<string> { "хуй", "даун", "негр" }; // запрещенные слова
-        private bool _isRunning;
+        private TcpListener listener;
+        private List<TcpClient> clients = new List<TcpClient>();
+        private List<string> bannedWords = new List<string> { "хуй", "даун", "негр" }; // запрещенные слова
+        private bool isRunning;
 
         public Server()
         {
             InitializeComponent();
         }
-
+        //запуск сервера
         private void StartServerButton_Click(object sender, EventArgs e)
         {
             try
             {
-                _listener = new TcpListener(IPAddress.Any, 8888);
-                _listener.Start();
-                _isRunning = true;
+                listener = new TcpListener(IPAddress.Any, 8888);
+                listener.Start();
+                isRunning = true;
 
                 Thread listenThread = new Thread(ListenForClients);
                 listenThread.Start();
@@ -39,15 +39,15 @@ namespace ServerChatForm
                 AppendLog($"Ошибка запуска сервера: {ex.Message}");
             }
         }
-
+        //подключает клиента
         private void ListenForClients()
         {
-            while (_isRunning)
+            while (isRunning)
             {
                 try
                 {
-                    TcpClient client = _listener.AcceptTcpClient();
-                    _clients.Add(client);
+                    TcpClient client = listener.AcceptTcpClient();
+                    clients.Add(client);
 
                     Thread clientThread = new Thread(() => HandleClient(client));
                     clientThread.Start();
@@ -60,7 +60,7 @@ namespace ServerChatForm
                 }
             }
         }
-
+        //принимает сообщения
         private void HandleClient(TcpClient client)
         {
             NetworkStream stream = client.GetStream();
@@ -75,7 +75,7 @@ namespace ServerChatForm
                     AppendLog($"Сообщение от клиента: {message}");
 
                     // Модерация сообщений
-                    foreach (var word in _bannedWords)
+                    foreach (var word in bannedWords)
                     {
                         if (message.Contains(word))
                         {
@@ -94,16 +94,16 @@ namespace ServerChatForm
             }
             finally
             {
-                _clients.Remove(client);
+                clients.Remove(client);
                 AppendLog("Клиент отключился.");
             }
         }
-
+        // проверка отправки
         private void BroadcastMessage(string message, TcpClient sender)
         {
             byte[] buffer = Encoding.UTF8.GetBytes(message);
 
-            foreach (var client in _clients)
+            foreach (var client in clients)
             {
                 if (client != sender)
                 {
@@ -119,7 +119,7 @@ namespace ServerChatForm
                 }
             }
         }
-
+        // показ всех логов
         private void AppendLog(string message)
         {
             if (LogBox.InvokeRequired)
@@ -131,11 +131,11 @@ namespace ServerChatForm
                 LogBox.AppendText(message + Environment.NewLine);
             }
         }
-
+        //стоп сервера
         private void StopServerButton_Click(object sender, EventArgs e)
         {
-            _isRunning = false;
-            _listener?.Stop();
+            isRunning = false;
+            listener?.Stop();
             AppendLog("Сервер остановлен.");
             StartServerButton.Enabled = true;
         }

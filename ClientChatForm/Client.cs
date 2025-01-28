@@ -7,21 +7,21 @@ namespace ClientChatForm
 {
     public partial class Client : Form
     {
-        private TcpClient _client;
-        private NetworkStream _stream;
+        private TcpClient client;
+        private NetworkStream stream;
 
         public Client()
         {
             InitializeComponent();
             
         }
-
+        //подключение к серверу
         private void ConnectButton_Click(object sender, EventArgs e)
         {
             try
             {
-                _client = new TcpClient("127.0.0.1", 8888);
-                _stream = _client.GetStream();
+                client = new TcpClient("127.0.0.1", 8888);
+                stream = client.GetStream();
 
                 Thread receiveThread = new Thread(ReceiveMessages);
                 receiveThread.Start();
@@ -41,17 +41,19 @@ namespace ClientChatForm
         {
             SendMessage();
         }
+
+        //отправка сообщений
         private void SendMessage()
         {
             string message = MessageTextBox.Text;
             if (!string.IsNullOrEmpty(message))
             {
                 byte[] buffer = Encoding.UTF8.GetBytes(message);
-                _stream.Write(buffer, 0, buffer.Length);
+                stream.Write(buffer, 0, buffer.Length);
                 MessageTextBox.Clear();
             }
         }
-
+        // принятие сообщений
         private void ReceiveMessages()
         {
             byte[] buffer = new byte[1024];
@@ -59,7 +61,7 @@ namespace ClientChatForm
 
             try
             {
-                while ((byteCount = _stream.Read(buffer, 0, buffer.Length)) > 0)
+                while ((byteCount = stream.Read(buffer, 0, buffer.Length)) > 0)
                 {
                     string message = Encoding.UTF8.GetString(buffer, 0, byteCount);
                     AppendMessage(message);
@@ -70,7 +72,7 @@ namespace ClientChatForm
                 AppendMessage("Соединение с сервером разорвано.");
             }
         }
-
+        //вывод сообщений в чат
         private void AppendMessage(string message)
         {
             if (ChatBox.InvokeRequired)
