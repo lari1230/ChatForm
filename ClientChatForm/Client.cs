@@ -13,6 +13,7 @@ namespace ClientChatForm
         public Client()
         {
             InitializeComponent();
+            
         }
 
         private void ConnectButton_Click(object sender, EventArgs e)
@@ -32,8 +33,15 @@ namespace ClientChatForm
                 MessageBox.Show($"Ошибка подключения: {ex.Message}");
             }
         }
-
+        private void Client_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter) SendMessage();
+        }
         private void SendButton_Click(object sender, EventArgs e)
+        {
+            SendMessage();
+        }
+        private void SendMessage()
         {
             string message = MessageTextBox.Text;
             if (!string.IsNullOrEmpty(message))
@@ -74,5 +82,7 @@ namespace ClientChatForm
                 ChatBox.AppendText(message + Environment.NewLine);
             }
         }
+
+        
     }
 }

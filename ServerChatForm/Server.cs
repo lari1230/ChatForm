@@ -12,7 +12,7 @@ namespace ServerChatForm
     {
         private TcpListener _listener;
         private List<TcpClient> _clients = new List<TcpClient>();
-        private List<string> _bannedWords = new List<string> { "badword1", "badword2" }; // запрещенные слова
+        private List<string> _bannedWords = new List<string> { "хуй", "даун", "негр" }; // запрещенные слова
         private bool _isRunning;
 
         public Server()
@@ -139,6 +139,8 @@ namespace ServerChatForm
             AppendLog("Сервер остановлен.");
             StartServerButton.Enabled = true;
         }
+
+
     }
 
 }
